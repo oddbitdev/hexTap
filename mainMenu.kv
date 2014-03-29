@@ -1,0 +1,60 @@
+#:kivy 1.8.0
+#:import Window kivy.core.window.Window
+<MainMenu>
+    canvas.before:
+        BorderImage:
+            source: 'assets/graphics/ui/background.png'
+            size: Window.size
+    AnchorLayout:
+        anchor_y: 'bottom'
+        Label:
+            text: ''
+            size_hint: 1, 0.8
+        AnchorLayout:
+            size_hint: 0.7, 0.2
+            BoxLayout:
+                orientation: 'vertical'
+                Button:
+                    size_hint: 1, 0.5
+                    text: 'New Game'
+                    halign: 'right'
+                    on_release: root.start_game = True
+                    background_normal: 'assets/graphics/ui/button_normal.png'
+                    background_down: 'assets/graphics/ui/button_down.png'
+                BoxLayout:
+                    size_hint: 1, 0.5
+                    Button:
+                        size_hint: 0.2, 1
+                        text: '?'
+                        halign: 'center'
+                        on_release: root.show_help = True
+                        background_normal: 'assets/graphics/ui/button_normal.png'
+                        background_down: 'assets/graphics/ui/button_down.png'
+                    Button:
+                        size_hint: 0.6, 1
+                        text: 'Options'
+                        halign: 'center'
+                        on_release: app.open_settings()
+                        background_normal: 'assets/graphics/ui/button_normal.png'
+                        background_down: 'assets/graphics/ui/button_down.png'
+                    Button:
+                        size_hint: 0.2, 1
+                        text: u"\u00A9"
+                        on_release: root.show_info()
+                        background_normal: 'assets/graphics/ui/button_normal.png'
+                        background_down: 'assets/graphics/ui/button_down.png'
+
+
+<InfoPopup>
+    size_hint: 0.9, 0.6
+    title: 'hexTap'
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            size_hint: 1, 0.4
+            text: 'Game design and programming: oddBit \n Graphics and sounds: kenney.nl under CC0 license\n Music by Edward Shallow under CC Attribution-ShareAlike 4.0 International license'
+            font_size: 25
+            text_size: self.size
+            line_height: 1.5
+            valign: 'middle'
+            halign: 'center'

@@ -1,0 +1,172 @@
+#:kivy 1.8.0
+#:import Window kivy.core.window.Window
+<Player>
+    size_hint: None, None
+    Image:
+        source: self.source
+        size: self.texture_size
+
+<Actor>
+    size_hint: None, None
+    Image:
+        source: self.source
+        size: self.texture_size
+
+<ReloadPopup>
+    size_hint: 0.9, 0.4
+    auto_dismiss: False if root.player_death else True
+    title: 'Confirm?'
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            size_hint: 1, 0.4
+            text: 'You Won! Reload current map or generate a new one?' if root.player_won else ('You Lost! Reload current map or generate a new one?' if root.player_death else 'Reload current map or generate a new one?')
+            font_size: 25
+            text_size: self.size
+            valign: 'middle'
+            halign: 'center'
+        BoxLayout:
+            size_hint: 1, 0.6
+            orientation: 'vertical'
+            BoxLayout:
+                size_hint: 1, 0.5
+                Button:
+                    size_hint: 0.5, 1
+                    text: 'Reload'
+                    on_release: root.context.parent.reload_level()
+                    background_normal: 'assets/graphics/ui/button_normal.png'
+                    background_down: 'assets/graphics/ui/button_down.png'
+                Button:
+                    size_hint: 0.5, 1
+                    text: 'New'
+                    on_release: root.context.parent.reload_level(True, root.new_difficulty)
+                    background_normal: 'assets/graphics/ui/button_normal.png'
+                    background_down: 'assets/graphics/ui/button_down.png'
+            Button:
+                size_hint: 1, 0.5
+                text: 'Main Menu'
+                on_release: root.context.parent.go_to_main_menu()
+                background_normal: 'assets/graphics/ui/button_normal.png'
+                background_down: 'assets/graphics/ui/button_down.png'
+
+<StarCounter>
+    canvas:
+        Color:
+            rgba: 80*(1/255.), 106*(1/255.), 210*(1/255.), 0.8
+        Rectangle:
+            size: self.size
+            pos: self.pos
+    size_hint: 1, 0.05
+    pos: (0, Window.size[1] - self.size[1]) if self.parent else (0, 0)
+    BoxLayout:
+        BoxLayout:
+            size_hint: 0.2, 1
+            Image:
+                size_hint: 0.2, 1
+                source: 'assets/graphics/tiles/starGold.png'
+                size: self.texture_size
+                valign: True
+            Label:
+                size_hint: 0.3, 1
+                text: str(root.stars) if root.stars else "0"
+                text_size: self.size
+                font_size: 30
+                bold: True
+                color: (250/255., 220/255., 50/255., 1)
+                valign: 'middle'
+        BoxLayout:
+            size_hint: 0.12, 1
+            Image:
+                id: keyYellow
+                source: 'assets/graphics/tiles/noKey.png'
+                size: self.texture_size
+        BoxLayout:
+            size_hint: 0.12, 1
+            Image:
+                id: keyGreen
+                source: 'assets/graphics/tiles/noKey.png'
+                size: self.texture_size
+        BoxLayout:
+            size_hint: 0.12, 1
+            Image:
+                id: keyOrange
+                source: 'assets/graphics/tiles/noKey.png'
+                size: self.texture_size
+        BoxLayout:
+            size_hint: 0.12, 1
+            Image:
+                id: keyBlue
+                source: 'assets/graphics/tiles/noKey.png'
+                size: self.texture_size
+        BoxLayout:
+            size_hint: 0.15, 1
+            Label:
+                text: str(root.score)
+                text_size: self.size
+                font_size: 30
+                bold: True
+                color: (250/255., 220/255., 50/255., 1)
+                valign: 'middle'
+        BoxLayout:
+            size_hint: 0.17, 1
+            Button:
+                text: 'menu'
+                on_release: root.parent.tile_map.show_reload_popup()
+                background_normal: 'assets/graphics/ui/button_normal.png'
+                background_down: 'assets/graphics/ui/button_down.png'
+
+<UpDownBubble>
+    size_hint: None, None
+    size: (130, 70)
+    pos: self.pos
+    border: [0, 0, 0, 0]
+    background_image: 'assets/graphics/ui/updown.png' if (upButton.disabled == False and downButton.disabled == False) else ('assets/graphics/ui/updis.png' if upButton.disabled == True else 'assets/graphics/ui/downdis.png')
+    arrow_image: 'assets/graphics/ui/arrow.png'
+
+    BubbleButton:
+        id: upButton
+        text: ''
+        disabled: root.up_disabled if root.up_disabled else False
+        on_press: root.up()
+    BubbleButton:
+        id: downButton
+        text: ''
+        disabled: root.down_disabled if root.down_disabled else False
+        on_press: root.down()
+
+<SkipTurnBubble>
+    size_hint: None, None
+    size: (48, 45)
+    pos: self.pos
+    border: [0, 0, 0, 0]
+    background_image: 'assets/graphics/ui/turnSkip.png'
+    arrow_image: 'assets/graphics/ui/arrow.png'
+    BubbleButton:
+        id: skipTurnButton
+        text: ''
+        on_release: root.context.end_player_turn()
+
+<HexTile>:
+    id: hexTile
+    size_hint: None, None
+    size: self.texture_size
+
+
+<HexScatter>:
+    size_hint: None, None
+    do_rotation: False
+    scale_min: 0.5
+    scale_max: 1.6
+
+<MapCanvas>
+    size_hint: 1, 1
+    canvas:
+        Color:
+            rgb: 90*(1/255.), 206*(1/255.), 210*(1/255.)
+        Rectangle:
+            size: self.size
+            pos: self.pos
+    orientation: 'vertical'
+
+<GameScreen>
+    size_hint: 1, 1
