@@ -33,7 +33,6 @@ class HexScatter(ScatterLayout):
         super(HexScatter, self).__init__(**kwargs)
         self.soundsOption = soundsOption
         self.musicOption = musicOption
-        tileradius = 120
         self.difficulty = difficulty
         self.x_offset = 1080
         self.y_offset = 1920
@@ -65,6 +64,18 @@ class HexScatter(ScatterLayout):
         self.score = 0
         self.popup = None
         self.player_won = False
+        self.create_map_from_data()
+
+        # for some reason the first time a bubble is loaded, it leads to a one or two second lag, preloading solves this
+        self.shadow_bubble = UpDownBubble(pos=(1000, 1000))
+        self.add_widget(self.shadow_bubble)
+        self.remove_widget(self.shadow_bubble)
+        self.hex_tiles = None
+        for enemy in self.enemy_list:
+            self.add_widget(enemy)
+
+    def create_map_from_data(self):
+        tileradius = 120
         for tile in self.hex_tiles:
             if tile.has_land:
                 tile_pos = ((tile.col * tileradius + (tileradius / 2) * (tile.row % 2)) + self.x_offset,
@@ -85,13 +96,6 @@ class HexScatter(ScatterLayout):
                 if tile.has_player:
                     self.tile_with_player = hex_tile
                     self.tile_with_player.add_player()
-
-        self.shadow_bubble = UpDownBubble(pos=(1000, 1000))
-        self.add_widget(self.shadow_bubble)
-        self.remove_widget(self.shadow_bubble)
-        self.hex_tiles = None
-        for enemy in self.enemy_list:
-            self.add_widget(enemy)
 
     def add_actor_to_map(self, tile, tile_pos, add_to_enemy_list=False):
         delay = choice([x / 1000. for x in range(80, 200, 5)])
@@ -137,9 +141,9 @@ class HexScatter(ScatterLayout):
 
     def schedule_move_to_hex(self, to_hex):
         self.to_hex = to_hex
-        Clock.schedule_once(self.move_to_hex)
+        Clock.schedule_once(self.move_to_hex_prep)
 
-    def move_to_hex(self, dt):
+    def move_to_hex_prep(self, dt):
         self.remove_skip_turn()
         self.player_death = False
         self.enemy_death = False
@@ -177,9 +181,9 @@ class HexScatter(ScatterLayout):
         self.from_hex.remove_player()
         self.add_widget(self.player)
 
-        self.determine_movement(jump)
+        self.complete_player_movement(jump)
 
-    def determine_movement(self, jump):
+    def complete_player_movement(self, jump):
         if self.from_hex.col > self.to_hex.col or (self.from_hex.col >= self.to_hex.col and self.from_hex.row % 2):
             if jump:
                 self.player.jump_left()
@@ -248,12 +252,13 @@ class HexScatter(ScatterLayout):
             self.player_death = True
             self.complete_level()
 
-    def end_player_turn(self):
-        self.end_without_movement()
+    def handle_portal(self):
         if self.tile_with_portal:
             self.move_portal()
             if not self.tile_with_portal.actor and random() > 0.2:
                 self.spawn_enemy_on_portal()
+
+    def is_player_dead(self):
         if self.player_death:
             self.tile_with_player.player.player_dead()
             death_anim = Animation(x=self.tile_with_player.player.y + 500, duration=0.1)
@@ -261,7 +266,9 @@ class HexScatter(ScatterLayout):
             death_anim.bind(on_complete=self.player_remove_on_death)
             self.player_death = True
             self.complete_level()
-            return
+            return True
+
+    def handle_star(self):
         if self.tile_with_player.star:
             self.score += 1 * self.difficulty
             self.parent.counter.update_counter(1, 1 * self.difficulty)
@@ -274,6 +281,8 @@ class HexScatter(ScatterLayout):
             star_anim.start(self.tile_with_player.star)
             star_anim.bind(on_complete=self.tile_with_player.remove_star)
             self.tile_with_player.player.add_star()
+
+    def handle_key(self):
         if self.tile_with_player.key:
             self.score += 5 * self.difficulty
             self.parent.counter.update_counter(0, 5 * self.difficulty)
@@ -299,6 +308,8 @@ class HexScatter(ScatterLayout):
             if self.soundsOption:
                 pick_key_sound = SoundLoader.load('assets/audio/pick_key.ogg')
                 pick_key_sound.play()
+
+    def player_has_all_exits(self):
         if self.tile_with_player.exit:
             self.score += 10 * self.difficulty
             self.parent.counter.update_counter(0, 10 * self.difficulty)
@@ -325,7 +336,17 @@ class HexScatter(ScatterLayout):
                     if len(self.player_has_keys) == self.difficulty and self.player_has_exits == self.difficulty:
                         self.player_won = True
                         self.complete_level()
-                        return
+                        return True
+
+    def end_player_turn(self):
+        self.end_without_movement()
+        self.handle_portal()
+        if self.is_player_dead():
+            return
+        self.handle_star()
+        self.handle_key()
+        if self.player_has_all_exits():
+            return
         self.player_is_jumping = False
         self.parent.show_enemy_turn_splash()
         Clock.schedule_once(self.process_enemy_turn, 0.7)
@@ -362,10 +383,7 @@ class HexScatter(ScatterLayout):
 
         return n_tiles
 
-    def process_enemy_turn(self, dt):
-        shuffle(self.enemy_list)
-        self.is_moving = True
-        self.is_move_mode = True
+    def prepare_actor_move_data(self):
         for tile in self.tiles:
             if tile.actor:
                 for e in self.enemy_list:
@@ -386,6 +404,8 @@ class HexScatter(ScatterLayout):
                         tile_choice.occupied = True
                         self.actor_move_data.append((tile, enemy, tile_choice))
                         tile.remove_actor()
+
+    def process_actor_movement(self):
         for data in self.actor_move_data:
             tile = data[0]
             actor = data[1]
@@ -401,6 +421,13 @@ class HexScatter(ScatterLayout):
             else:
                 move_anim = Animation(x=to_hex.pos[0] + 10, y=to_hex.pos[1] + 249, duration=0.2)
             move_anim.start(actor)
+
+    def process_enemy_turn(self, dt):
+        shuffle(self.enemy_list)
+        self.is_moving = True
+        self.is_move_mode = True
+        self.prepare_actor_move_data()
+        self.process_actor_movement()
 
         if self.actor_move_data:
             Clock.schedule_once(self.end_enemy_turn, 0.4)

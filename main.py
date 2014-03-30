@@ -28,9 +28,9 @@ Builder.load_file('mainMenu.kv')
 
 if use_ads:
     if platform() == 'android':
-        REVMOB_APP_ID = 'android_id'
+        REVMOB_APP_ID = '533204c547771da3056a9d8c'
     elif platform() == 'ios':
-        REVMOB_APP_ID = 'ios_id'
+        REVMOB_APP_ID = '53321a399208c2b14de244d3'
     else:
         REVMOB_APP_ID = 'unknown platform for RevMob'
 
@@ -53,49 +53,32 @@ class HexTap(App):
         self.musicOption = False
         self.hardcoreOption = False
 
+    def safe_options_loading(self):
+        if type(self.soundsOption) == bool or type(self.soundsOption) == int:
+            pass
+        elif self.soundsOption == 'True' or '1' in self.soundsOption:
+            self.soundsOption = True
+        else:
+            self.soundsOption = False
+        if type(self.musicOption) == bool or type(self.musicOption) == int:
+            pass
+        elif self.musicOption == 'True' or '1' in self.musicOption:
+            self.musicOption = True
+        else:
+            self.musicOption = False
+        if type(self.hardcoreOption) == bool or type(self.hardcoreOption) == int:
+            pass
+        elif self.hardcoreOption == 'True' or '1' in self.hardcoreOption:
+            self.hardcoreOption = True
+        else:
+            self.hardcoreOption = False
+
     def build(self):
         self.use_kivy_settings = False
         self.soundsOption = self.config.get('sound', 'soundsOption')
         self.musicOption = self.config.get('sound', 'musicOption')
         self.hardcoreOption = self.config.get('game', 'hardcoreOption')
-        if type(self.soundsOption) == bool or type(self.soundsOption) == int:
-            pass
-        elif self.soundsOption == 'True':
-            self.soundsOption = True
-        elif self.soundsOption == 'False':
-            self.soundsOption = False
-        elif '1' in self.soundsOption:
-            self.soundsOption = True
-        elif '0' in self.soundsOption:
-            self.soundsOption = False
-        else:
-            self.soundsOption = True
-
-        if type(self.musicOption) == bool or type(self.musicOption) == int:
-            pass
-        elif self.musicOption == 'True':
-            self.musicOption = True
-        elif self.musicOption == 'False':
-            self.musicOption = False
-        elif '1' in self.musicOption:
-            self.musicOption = True
-        elif '0' in self.musicOption:
-            self.musicOption = False
-        else:
-            self.musicOption = False
-
-        if type(self.hardcoreOption) == bool or type(self.hardcoreOption) == int:
-            pass
-        elif self.hardcoreOption == 'True':
-            self.hardcoreOption = True
-        elif self.hardcoreOption == 'False':
-            self.hardcoreOption = False
-        elif '1' in self.hardcoreOption:
-            self.hardcoreOption = True
-        elif '0' in self.hardcoreOption:
-            self.hardcoreOption = False
-        else:
-            self.hardcoreOption = False
+        self.safe_options_loading()
         Clock.schedule_interval(self.update, 1. / 1.5)
         return self.content
 
@@ -164,35 +147,23 @@ class HexTap(App):
         if key == 'musicOption':
             if type(value) == bool or type(value) == int:
                 self.musicOption = value
-            elif value == 'True':
+            elif value == 'True' or '1' in value:
                 self.musicOption = True
-            elif self.soundsOption == 'False':
-                self.musicOption = False
-            elif '1' in value:
-                self.musicOption = True
-            elif '0' in value:
+            else:
                 self.musicOption = False
         elif key == 'soundsOption':
             if type(value) == bool or type(value) == int:
                 self.soundsOption = value
-            elif value == 'True':
+            elif value == 'True' or '1' in value:
                 self.soundsOption = True
-            elif value == 'False':
-                self.soundsOption = False
-            elif '1' in value:
-                self.soundsOption = True
-            elif '0' in value:
+            else:
                 self.soundsOption = False
         elif key == 'hardcoreOption':
             if type(value) == bool or type(value) == int:
                 self.hardcoreOption = value
-            elif value == 'True':
+            elif value == 'True' or '1' in value:
                 self.hardcoreOption = True
-            elif value == 'False':
-                self.hardcoreOption = False
-            elif '1' in value:
-                self.hardcoreOption = True
-            elif '0' in value:
+            else:
                 self.hardcoreOption = False
 
     def on_pause(self):
