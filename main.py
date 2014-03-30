@@ -28,9 +28,9 @@ Builder.load_file('mainMenu.kv')
 
 if use_ads:
     if platform() == 'android':
-        REVMOB_APP_ID = '533204c547771da3056a9d8c'
+        REVMOB_APP_ID = 'android_id'
     elif platform() == 'ios':
-        REVMOB_APP_ID = '53321a399208c2b14de244d3'
+        REVMOB_APP_ID = 'ios_id'
     else:
         REVMOB_APP_ID = 'unknown platform for RevMob'
 
