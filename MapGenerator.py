@@ -61,7 +61,7 @@ class MapGenerator:
                 tile.level = 1
             elif random() > 0.8:
                 tile.level = 2
-            elif random > 0.9:
+            elif random() > 0.9:
                 tile.level = 3
             if tile.has_land:
                 if tile.row <= 1:
@@ -120,3 +120,4 @@ class MapGenerator:
                     tile.has_star = True
 
         return hex_tiles
+
