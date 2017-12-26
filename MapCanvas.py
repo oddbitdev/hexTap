@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 __author__ = 'oddBit'
 
 from kivy.uix.floatlayout import FloatLayout
@@ -7,7 +9,6 @@ from MapGenerator import MapGenerator
 from kivy.core.window import Window
 from kivy.uix.image import Image
 from data.gameData import *
-
 
 class MapCanvas(FloatLayout):
     def __init__(self, cols, rows, difficulty, hardcoreOption, soundsOption, musicOptions, **kwargs):
@@ -55,7 +56,7 @@ class MapCanvas(FloatLayout):
         self.tile_map = None
         if new_map:
             self.hex_tiles = None
-            print new_difficulty
+            print (new_difficulty)
             rows, cols = map_sizes[new_difficulty-1]
             self.map_generator = MapGenerator(cols, rows)
             self.hex_tiles = self.map_generator.generate_map(self.difficulty, self.hardcore_option)
@@ -84,3 +85,4 @@ class MapCanvas(FloatLayout):
         return HexScatter(self.hex_tiles, self.difficulty, self.soundsOption, self.musicOption,
                           size=[18 * 120 + 1080, 22 * 120 + 1920], pos=[0, 0],
                           auto_bring_to_front=False)
+
